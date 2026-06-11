@@ -27,12 +27,14 @@ export function About() {
         })
 
         gsap.from('.about__stat', {
-          y: 50,
+          y: 40,
+          rotateX: -75,
+          transformOrigin: 'center bottom',
+          transformPerspective: 800,
           opacity: 0,
-          scale: 0.9,
-          duration: 0.7,
-          stagger: 0.1,
-          ease: 'back.out(1.6)',
+          duration: 0.9,
+          stagger: 0.12,
+          ease: 'back.out(1.4)',
           scrollTrigger: { trigger: '.about__stats', start: 'top 82%' },
         })
 

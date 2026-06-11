@@ -12,13 +12,15 @@ export function Skills() {
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap.from('.skills__group', {
-          y: 80,
+          y: 100,
+          z: -260,
           opacity: 0,
-          rotateX: -14,
-          transformPerspective: 900,
-          transformOrigin: 'center top',
-          duration: 0.9,
-          stagger: 0.14,
+          rotateX: -35,
+          rotateY: 8,
+          transformPerspective: 1000,
+          transformOrigin: 'center bottom',
+          duration: 1.1,
+          stagger: 0.16,
           ease: 'power3.out',
           scrollTrigger: { trigger: '.skills', start: 'top 78%' },
         })
