@@ -25,10 +25,15 @@ export function Experience() {
         })
 
         gsap.utils.toArray('.timeline__item').forEach((item, i) => {
+          // Cards swing in like doors hinged on the center line.
+          const fromLeft = i % 2 === 0
           gsap.from(item.querySelector('.timeline__card'), {
-            x: i % 2 === 0 ? -80 : 80,
+            x: fromLeft ? -50 : 50,
+            rotateY: fromLeft ? 38 : -38,
+            transformOrigin: fromLeft ? 'right center' : 'left center',
+            transformPerspective: 1100,
             opacity: 0,
-            duration: 0.9,
+            duration: 1,
             ease: 'power3.out',
             scrollTrigger: { trigger: item, start: 'top 80%' },
           })

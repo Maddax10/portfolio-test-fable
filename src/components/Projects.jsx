@@ -5,7 +5,7 @@ import { Icon } from './Icon.jsx'
 
 function ProjectCard({ project, index }) {
   return (
-    <article className={`project card ${project.featured ? 'project--featured' : ''}`}>
+    <article className="project card">
       <span className="project__index" aria-hidden="true">
         {String(index + 1).padStart(2, '0')}
       </span>
@@ -15,8 +15,14 @@ function ProjectCard({ project, index }) {
           background: `linear-gradient(135deg, ${project.gradient[0]}, ${project.gradient[1]})`,
         }}
       >
-        <span className="project__emoji" aria-hidden="true">
-          {project.emoji}
+        {project.featured && (
+          <span className="project__badge">
+            <Icon name="star" size={12} strokeWidth={2.5} />
+            Featured
+          </span>
+        )}
+        <span className="project__icon" aria-hidden="true">
+          <Icon name={project.icon} size={54} strokeWidth={1.4} />
         </span>
         <div className="project__links">
           <a
@@ -57,7 +63,8 @@ function ProjectCard({ project, index }) {
 
 /**
  * The big "parkour" moment: the section pins to the screen and vertical
- * scrolling carries you horizontally through the project gallery.
+ * scrolling carries you horizontally through the gallery — with a
+ * coverflow effect where side cards lean away in 3D.
  */
 export function Projects() {
   const sectionRef = useRef(null)
@@ -69,8 +76,25 @@ export function Projects() {
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         const track = trackRef.current
+        const cards = gsap.utils.toArray('.phase .project')
         const distance = () =>
           Math.max(0, track.scrollWidth - document.documentElement.clientWidth)
+
+        // Coverflow: the card nearest the viewport center stands flat,
+        // its neighbours lean away into the depth.
+        const applyDepth = () => {
+          const viewportCenter = document.documentElement.clientWidth / 2
+          cards.forEach((card) => {
+            const rect = card.getBoundingClientRect()
+            const offset = (rect.left + rect.width / 2 - viewportCenter) / viewportCenter
+            const eased = gsap.utils.clamp(-1.4, 1.4, offset)
+            gsap.set(card, {
+              rotationY: eased * -16,
+              z: -Math.abs(eased) * 150,
+              scale: 1 - Math.abs(eased) * 0.05,
+            })
+          })
+        }
 
         gsap.to(track, {
           x: () => -distance(),
@@ -91,17 +115,37 @@ export function Projects() {
             onUpdate: (self) => {
               const current = Math.round(self.progress * (projects.length - 1)) + 1
               counterRef.current.textContent = String(current).padStart(2, '0')
+              applyDepth()
             },
+            onRefresh: applyDepth,
           },
         })
 
-        gsap.from('.phase__header', {
-          y: 40,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 70%' },
-        })
+        // The whole gallery rises out of the page depth as it approaches.
+        gsap.fromTo(
+          '.phase__scene',
+          {
+            rotateX: 14,
+            z: -200,
+            scale: 0.9,
+            autoAlpha: 0.05,
+            transformOrigin: 'center 90%',
+            transformPerspective: 1400,
+          },
+          {
+            rotateX: 0,
+            z: 0,
+            scale: 1,
+            autoAlpha: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 96%',
+              end: 'top 15%',
+              scrub: 0.4,
+            },
+          },
+        )
       })
     },
     { scope: sectionRef },
@@ -112,28 +156,31 @@ export function Projects() {
       <span className="section__ghost section__ghost--phase" aria-hidden="true">
         03
       </span>
-      <div className="container phase__header">
-        <div>
-          <p className="section__eyebrow">Projects</p>
-          <h2 className="section__title">Things I&apos;ve built</h2>
+      <div className="phase__scene">
+        <div className="container phase__header">
+          <div>
+            <p className="section__eyebrow">Projects</p>
+            <h2 className="section__title">Things I&apos;ve built</h2>
+          </div>
+          <p className="phase__counter">
+            <span ref={counterRef}>01</span>
+            <span className="phase__counter-total"> / {String(projects.length).padStart(2, '0')}</span>
+          </p>
         </div>
-        <p className="phase__counter">
-          <span ref={counterRef}>01</span>
-          <span className="phase__counter-total"> / {String(projects.length).padStart(2, '0')}</span>
+
+        <div className="phase__viewport">
+          <div ref={trackRef} className="phase__track">
+            {projects.map((project, index) => (
+              <ProjectCard key={project.title} project={project} index={index} />
+            ))}
+          </div>
+        </div>
+
+        <p className="phase__hint" aria-hidden="true">
+          keep scrolling — the course turns sideways here
+          <Icon name="arrowDown" size={14} />
         </p>
       </div>
-
-      <div className="phase__viewport">
-        <div ref={trackRef} className="phase__track">
-          {projects.map((project, index) => (
-            <ProjectCard key={project.title} project={project} index={index} />
-          ))}
-        </div>
-      </div>
-
-      <p className="phase__hint" aria-hidden="true">
-        keep scrolling — the course turns sideways here ↓
-      </p>
     </section>
   )
 }

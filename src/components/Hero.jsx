@@ -3,6 +3,7 @@ import { profile } from '../data/portfolio.js'
 import { useMagnetic } from '../hooks/useMagnetic.js'
 import { gsap, useGSAP } from '../lib/gsapSetup.js'
 import { Icon } from './Icon.jsx'
+import { LOADER_MS } from './Loader.jsx'
 
 function MaskedWords({ text, className = '' }) {
   return (
@@ -18,6 +19,7 @@ function MaskedWords({ text, className = '' }) {
 
 export function Hero() {
   const heroRef = useRef(null)
+  const codeCardRef = useRef(null)
   const primaryCta = useMagnetic()
   const secondaryCta = useMagnetic(0.25)
 
@@ -25,23 +27,35 @@ export function Hero() {
     () => {
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        // Entrance: words rise out of their masks, then the rest follows.
-        const intro = gsap.timeline({ defaults: { ease: 'power4.out' } })
+        // Entrance: waits for the loader curtain, then words rise out of
+        // their masks and the layers assemble in depth.
+        const intro = gsap.timeline({
+          delay: (LOADER_MS - 500) / 1000,
+          defaults: { ease: 'power4.out' },
+        })
         intro
-          .from('.hero__badge', { y: 24, opacity: 0, duration: 0.7 })
+          .from('.hero__badge', { y: 24, autoAlpha: 0, duration: 0.7 })
           .from(
             '.mask-line__word',
-            { yPercent: 120, duration: 1.1, stagger: 0.07 },
+            { yPercent: 120, rotateX: -50, transformPerspective: 800, duration: 1.1, stagger: 0.07 },
             0.15,
           )
-          .from('.hero__tagline', { y: 30, opacity: 0, duration: 0.8 }, 0.75)
-          .from('.hero__actions > *', { y: 24, opacity: 0, stagger: 0.1, duration: 0.6 }, 0.9)
-          .from('.hero__socials li', { y: 18, opacity: 0, stagger: 0.08, duration: 0.5 }, 1.05)
+          .from('.hero__tagline', { y: 30, autoAlpha: 0, duration: 0.8 }, 0.75)
+          .from('.hero__actions > *', { y: 24, autoAlpha: 0, stagger: 0.1, duration: 0.6 }, 0.9)
+          .from('.hero__socials li', { y: 18, autoAlpha: 0, stagger: 0.08, duration: 0.5 }, 1.05)
           .from(
             '.hero__code',
-            { y: 40, opacity: 0, rotateX: -18, duration: 0.9, transformPerspective: 600 },
+            {
+              y: 60,
+              z: -200,
+              autoAlpha: 0,
+              rotateX: -32,
+              duration: 1.1,
+              transformPerspective: 900,
+            },
             1.1,
           )
+          .from('.hero__scroll-hint', { autoAlpha: 0, duration: 0.6 }, 1.4)
 
         // Depth on the way out: layers leave at different speeds.
         const scrub = { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: true }
@@ -49,6 +63,32 @@ export function Hero() {
         gsap.to('.hero__orb--1', { yPercent: 42, ease: 'none', scrollTrigger: scrub })
         gsap.to('.hero__orb--2', { yPercent: -34, ease: 'none', scrollTrigger: scrub })
         gsap.to('.hero__grid', { yPercent: 18, opacity: 0, ease: 'none', scrollTrigger: scrub })
+
+        // Interactive 3D: the code card tilts toward the cursor.
+        if (window.matchMedia('(pointer: fine)').matches) {
+          const card = codeCardRef.current
+          const rotX = gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3' })
+          const rotY = gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3' })
+          gsap.set(card, { transformPerspective: 900 })
+
+          const onMove = (event) => {
+            const rect = card.getBoundingClientRect()
+            const relX = (event.clientX - rect.left) / rect.width - 0.5
+            const relY = (event.clientY - rect.top) / rect.height - 0.5
+            rotY(relX * 16)
+            rotX(relY * -16)
+          }
+          const onLeave = () => {
+            rotX(0)
+            rotY(0)
+          }
+          card.addEventListener('mousemove', onMove)
+          card.addEventListener('mouseleave', onLeave)
+          return () => {
+            card.removeEventListener('mousemove', onMove)
+            card.removeEventListener('mouseleave', onLeave)
+          }
+        }
       })
     },
     { scope: heroRef },
@@ -79,7 +119,8 @@ export function Hero() {
 
         <div className="hero__actions">
           <a ref={primaryCta} href="#projects" className="btn">
-            Start the course 🏁
+            <Icon name="flag" size={17} />
+            Start the course
           </a>
           <a ref={secondaryCta} href="#contact" className="btn btn--ghost">
             Get in touch
@@ -102,7 +143,7 @@ export function Hero() {
           ))}
         </ul>
 
-        <div className="hero__code" aria-hidden="true">
+        <div ref={codeCardRef} className="hero__code" aria-hidden="true">
           <pre>
             <code>
               <span className="tok-kw">const</span>{' '}
@@ -120,7 +161,7 @@ export function Hero() {
 
       <a href="#about" className="hero__scroll-hint" aria-label="Scroll to about section">
         <span className="hero__scroll-text">scroll to run</span>
-        <Icon name="arrowDown" />
+        <Icon name="arrowDown" size={18} />
       </a>
     </section>
   )

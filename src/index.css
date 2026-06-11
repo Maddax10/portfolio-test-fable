@@ -542,6 +542,10 @@ ol {
   overflow: hidden;
 }
 
+.section__scene {
+  will-change: transform, opacity;
+}
+
 /* Painted via ::before at z -1 so the journey path can pass over it. */
 .section--alt::before {
   content: '';
@@ -726,11 +730,13 @@ ol {
   height: 165px;
 }
 
-.project--featured .project__cover::after {
-  content: '★ Featured';
+.project__badge {
   position: absolute;
   top: 0.8rem;
   left: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
   font-size: 0.72rem;
@@ -740,14 +746,15 @@ ol {
   backdrop-filter: blur(6px);
 }
 
-.project__emoji {
-  font-size: 3.4rem;
+.project__icon {
+  color: #fff;
+  opacity: 0.92;
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.3));
   transition: transform var(--transition);
 }
 
-.project:hover .project__emoji {
-  transform: scale(1.15) rotate(-4deg);
+.project:hover .project__icon {
+  transform: scale(1.12) rotate(-4deg);
 }
 
 .project__links {
@@ -1026,6 +1033,76 @@ ol {
 }
 
 /* ===========================================================================
+   Loader curtain
+   =========================================================================== */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.loader__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  background: var(--bg-soft);
+  border-right: 1px solid var(--border);
+}
+
+.loader__panel--left {
+  left: 0;
+}
+
+.loader__panel--right {
+  right: 0;
+  border-right: none;
+}
+
+.loader__content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+}
+
+.loader__logo {
+  font-family: var(--font-mono);
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 600;
+}
+
+.loader__bracket {
+  color: var(--accent-1);
+}
+
+.loader__bar {
+  width: min(260px, 60vw);
+  height: 2px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.loader__bar-fill {
+  height: 100%;
+  background: var(--gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.loader__counter {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+}
+
+/* ===========================================================================
    Scroll progress bar
    =========================================================================== */
 
@@ -1127,9 +1204,9 @@ ol {
   transition: opacity 0.3s ease;
 }
 
-.journey__runner-emoji {
-  font-size: 1.3rem;
-  display: inline-block;
+.journey__runner-icon {
+  display: inline-flex;
+  color: var(--accent-1);
 }
 
 @media (max-width: 899px) {
@@ -1174,6 +1251,7 @@ ol {
 }
 
 .marquee__star {
+  display: inline-flex;
   color: var(--accent-1);
 }
 
@@ -1228,23 +1306,43 @@ ol {
   color: var(--text-muted);
 }
 
+.phase__scene {
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+  will-change: transform, opacity;
+}
+
 .phase__viewport {
   overflow: hidden;
   position: relative;
   z-index: 1;
+  perspective: 1400px;
 }
 
 .phase__track {
   display: flex;
+  align-items: stretch;
   gap: 2rem;
   width: max-content;
   padding-inline: max(1.5rem, calc((100vw - 1100px) / 2)) 6rem;
+  padding-block: 1.5rem;
   will-change: transform;
+  transform-style: preserve-3d;
 }
 
 .phase .project {
   width: clamp(300px, 36vw, 440px);
   flex-shrink: 0;
+  will-change: transform;
+  /* GSAP drives the transform (coverflow) — no CSS transition on it. */
+  transition: border-color var(--transition), box-shadow var(--transition),
+    background var(--transition);
+}
+
+.phase .project:hover {
+  border-color: var(--accent-1);
+  box-shadow: var(--shadow);
 }
 
 .phase .project__cover {
@@ -1252,6 +1350,10 @@ ol {
 }
 
 .phase__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   text-align: center;
   font-family: var(--font-mono);
   font-size: 0.75rem;

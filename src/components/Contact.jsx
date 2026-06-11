@@ -16,15 +16,21 @@ export function Contact() {
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap.from('.contact__info', {
           x: -60,
+          rotateY: 24,
+          transformOrigin: 'right center',
+          transformPerspective: 1100,
           opacity: 0,
-          duration: 0.9,
+          duration: 1,
           ease: 'power3.out',
           scrollTrigger: { trigger: '.contact', start: 'top 75%' },
         })
         gsap.from('.contact__form', {
           x: 60,
+          rotateY: -24,
+          transformOrigin: 'left center',
+          transformPerspective: 1100,
           opacity: 0,
-          duration: 0.9,
+          duration: 1,
           ease: 'power3.out',
           scrollTrigger: { trigger: '.contact', start: 'top 75%' },
         })
@@ -65,7 +71,7 @@ export function Contact() {
       <div ref={rootRef} className="contact">
         <div className="contact__info">
           <p>
-            You made it through the whole course! 🏁 Have a project in mind, a
+            You made it through the whole course! Have a project in mind, a
             question, or just want to say hi? My inbox is always open — I&apos;ll
             get back to you as soon as I can.
           </p>

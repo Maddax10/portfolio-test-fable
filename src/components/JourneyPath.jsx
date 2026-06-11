@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, ScrollTrigger, useGSAP } from '../lib/gsapSetup.js'
+import { Icon } from './Icon.jsx'
 
 const CHECKPOINTS = ['about', 'skills', 'projects', 'experience', 'contact']
 
@@ -89,11 +90,10 @@ export function JourneyPath() {
           const pt = path.getPointAtLength(len)
           const ahead = path.getPointAtLength(Math.min(len + 4, total))
           gsap.set(runner, { x: pt.x, y: pt.y })
-          // Face the direction of travel.
-          if (Math.abs(ahead.x - pt.x) > 0.3) {
-            emojiRef.current.style.transform =
-              ahead.x < pt.x ? 'scaleX(-1)' : 'scaleX(1)'
-          }
+          // Point the rocket along the direction of travel
+          // (the icon's nose points up-right, i.e. -45° from horizontal).
+          const angle = (Math.atan2(ahead.y - pt.y, ahead.x - pt.x) * 180) / Math.PI
+          gsap.set(emojiRef.current, { rotation: angle + 45 })
           runner.style.opacity = progress > 0.005 ? 1 : 0
 
           const nodes = svg.querySelectorAll('.journey__node')
@@ -145,8 +145,8 @@ export function JourneyPath() {
         ))}
       </svg>
       <div ref={runnerRef} className="journey__runner">
-        <span ref={emojiRef} className="journey__runner-emoji">
-          🏃
+        <span ref={emojiRef} className="journey__runner-icon">
+          <Icon name="rocket" size={20} strokeWidth={1.8} />
         </span>
       </div>
     </div>
