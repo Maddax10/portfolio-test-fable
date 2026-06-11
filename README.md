@@ -1,17 +1,31 @@
-# React Developer Portfolio
+# React Developer Portfolio — "Parkour" Edition
 
-A modern, responsive portfolio website for a React web developer.
-Built with **React 19** and **Vite** — no UI framework, just clean CSS.
+A modern, responsive portfolio website for a React web developer, designed as a
+**scroll journey**: a winding course is drawn down the page as you scroll, with
+a runner 🏃 that follows your progress from checkpoint to checkpoint.
+Built with **React 19**, **Vite**, **GSAP ScrollTrigger** and **Lenis**.
 
-## ✨ Features
+## ✨ The wow effects
+
+- 🏃 **Journey path** — an SVG course winds through the whole page, draws itself
+  as you scroll, and a runner travels along it, lighting up section checkpoints
+- 📌 **Pinned horizontal gallery** — the Projects section locks to the screen and
+  vertical scrolling carries you sideways through the cards (with snapping and a
+  live `03 / 06` counter)
+- 🧈 **Buttery smooth scrolling** via Lenis, synced with ScrollTrigger
+- 🎭 **Hero entrance** — masked word-by-word title reveal, then layers separate
+  with parallax as you scroll away
+- 🔢 **Animated counters**, 3D card reveals, alternating timeline slide-ins,
+  a skills marquee, magnetic buttons and a cursor glow
+
+## 🧩 Also included
 
 - **Dark / light theme** with system preference detection, persisted in `localStorage`
 - **Fully responsive** — mobile hamburger menu, fluid typography, adaptive grids
-- **Scroll animations** — sections reveal on scroll via `IntersectionObserver` (respects `prefers-reduced-motion`)
 - **Active section highlighting** in the navbar while scrolling
-- **Sections**: Hero, About, Skills, Projects, Experience timeline, Contact form, Footer
 - **Contact form** that opens the visitor's mail client (no backend required)
-- **Accessible**: semantic HTML, keyboard navigation, focus styles, ARIA labels
+- **Accessible**: semantic HTML, keyboard navigation, focus styles, ARIA labels —
+  and every animation is disabled under `prefers-reduced-motion`
 - **SEO ready**: meta description, Open Graph tags
 
 ## 🚀 Getting started

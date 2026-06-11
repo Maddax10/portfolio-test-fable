@@ -48,7 +48,7 @@ export const skillGroups = [
       'HTML5',
       'CSS3 / Sass',
       'Tailwind CSS',
-      'Framer Motion',
+      'GSAP / ScrollTrigger',
     ],
   },
   {
@@ -176,6 +176,19 @@ export const experience = [
       'First professional role: implemented UI features, fixed bugs and wrote tests for a B2B platform used by thousands of daily users. Learned the craft of code reviews and agile teamwork.',
     stack: ['JavaScript', 'React', 'Jest', 'Git'],
   },
+]
+
+export const marquee = [
+  'React',
+  'TypeScript',
+  'Next.js',
+  'GSAP',
+  'Node.js',
+  'GraphQL',
+  'Tailwind CSS',
+  'Vite',
+  'Jest',
+  'Figma',
 ]
 
 export const navLinks = [
