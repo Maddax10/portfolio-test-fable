@@ -1,10 +1,46 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { profile } from '../data/portfolio.js'
+import { useMagnetic } from '../hooks/useMagnetic.js'
+import { gsap, useGSAP } from '../lib/gsapSetup.js'
 import { Icon } from './Icon.jsx'
 import { Section } from './Section.jsx'
 
 export function Contact() {
+  const rootRef = useRef(null)
+  const submitRef = useMagnetic(0.3)
   const [form, setForm] = useState({ name: '', email: '', message: '' })
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.from('.contact__info', {
+          x: -60,
+          opacity: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.contact', start: 'top 75%' },
+        })
+        gsap.from('.contact__form', {
+          x: 60,
+          opacity: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.contact', start: 'top 75%' },
+        })
+        gsap.from('.contact__form > *', {
+          y: 26,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          delay: 0.25,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.contact', start: 'top 75%' },
+        })
+      })
+    },
+    { scope: rootRef },
+  )
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -20,12 +56,18 @@ export function Contact() {
   }
 
   return (
-    <Section id="contact" eyebrow="Contact" title="Let's build something together">
-      <div className="contact">
+    <Section
+      id="contact"
+      index="05"
+      eyebrow="Contact"
+      title="Finish line — let's build something together"
+    >
+      <div ref={rootRef} className="contact">
         <div className="contact__info">
           <p>
-            Have a project in mind, a question, or just want to say hi? My inbox is
-            always open — I&apos;ll get back to you as soon as I can.
+            You made it through the whole course! 🏁 Have a project in mind, a
+            question, or just want to say hi? My inbox is always open — I&apos;ll
+            get back to you as soon as I can.
           </p>
           <a href={`mailto:${profile.email}`} className="contact__email">
             <Icon name="mail" />
@@ -87,7 +129,7 @@ export function Contact() {
             />
           </label>
 
-          <button type="submit" className="btn btn--full">
+          <button ref={submitRef} type="submit" className="btn btn--full">
             Send message
           </button>
         </form>

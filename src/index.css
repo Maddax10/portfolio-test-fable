@@ -123,6 +123,13 @@ ol {
 .container {
   width: min(1100px, 100% - 3rem);
   margin-inline: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.site {
+  position: relative;
+  overflow-x: clip;
 }
 
 /* ===========================================================================
@@ -199,6 +206,7 @@ ol {
 }
 
 .card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -224,16 +232,27 @@ ol {
   color: var(--text-muted);
 }
 
-/* Scroll reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+/* Masked word reveal (hero title) */
+.mask-line {
+  display: block;
 }
 
-.reveal.revealed {
-  opacity: 1;
-  transform: none;
+.mask-line__mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.mask-line__word {
+  display: inline-block;
+  will-change: transform;
+}
+
+.mask-line--accent .mask-line__word {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* ===========================================================================
@@ -488,8 +507,19 @@ ol {
   left: 50%;
   bottom: 1.6rem;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
   color: var(--text-muted);
   animation: bob 2.2s ease-in-out infinite;
+}
+
+.hero__scroll-text {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 @keyframes bob {
@@ -507,11 +537,32 @@ ol {
    =========================================================================== */
 
 .section {
-  padding: 6rem 0;
+  position: relative;
+  padding: 7rem 0;
+  overflow: hidden;
 }
 
-.section:nth-of-type(even) {
+/* Painted via ::before at z -1 so the journey path can pass over it. */
+.section--alt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: var(--bg-soft);
+  z-index: -1;
+}
+
+.section__ghost {
+  position: absolute;
+  top: 1.5rem;
+  right: -1rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(7rem, 16vw, 13rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--border);
+  pointer-events: none;
+  user-select: none;
 }
 
 .section__header {
@@ -755,39 +806,57 @@ ol {
 .timeline {
   position: relative;
   display: grid;
-  gap: 2rem;
-  max-width: 760px;
-  padding-left: 2.4rem;
+  gap: 2.6rem;
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 1rem 0;
 }
 
-.timeline::before {
-  content: '';
+.timeline__line {
   position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 15px;
+  top: 0;
+  bottom: 0;
+  left: 50%;
   width: 2px;
+  transform: translateX(-50%);
   background: linear-gradient(var(--accent-1), var(--accent-2));
-  opacity: 0.45;
+  opacity: 0.5;
 }
 
 .timeline__item {
   position: relative;
+  width: calc(50% - 3rem);
+}
+
+.timeline__item--left {
+  margin-right: auto;
+}
+
+.timeline__item--right {
+  margin-left: auto;
 }
 
 .timeline__marker {
   position: absolute;
-  top: 1.5rem;
-  left: -2.4rem;
+  top: 1.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   color: var(--accent-1);
   background: var(--bg);
   border: 2px solid var(--accent-1);
+  z-index: 1;
+}
+
+.timeline__item--left .timeline__marker {
+  right: calc(-3rem - 17px);
+}
+
+.timeline__item--right .timeline__marker {
+  left: calc(-3rem - 17px);
 }
 
 .timeline__card {
@@ -798,7 +867,25 @@ ol {
 
 .timeline__card:hover {
   border-color: var(--accent-1);
-  transform: translateX(4px);
+}
+
+@media (max-width: 820px) {
+  .timeline__line {
+    left: 16px;
+  }
+
+  .timeline__item,
+  .timeline__item--left,
+  .timeline__item--right {
+    width: auto;
+    margin: 0 0 0 3.2rem;
+  }
+
+  .timeline__item--left .timeline__marker,
+  .timeline__item--right .timeline__marker {
+    left: calc(-3.2rem - 1px);
+    right: auto;
+  }
 }
 
 .timeline__period {
@@ -939,6 +1026,256 @@ ol {
 }
 
 /* ===========================================================================
+   Scroll progress bar
+   =========================================================================== */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 120;
+}
+
+/* ===========================================================================
+   Cursor glow
+   =========================================================================== */
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-1) 0%, transparent 60%);
+  opacity: 0.1;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-100vw, -100vh);
+}
+
+[data-theme='light'] .cursor-glow {
+  mix-blend-mode: multiply;
+  opacity: 0.05;
+}
+
+/* ===========================================================================
+   Journey path (the parkour course)
+   =========================================================================== */
+
+.journey {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.journey__path {
+  fill: none;
+  stroke: url(#journey-gradient);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 0;
+  opacity: 0.6;
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.45));
+}
+
+.journey__node-ring {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 2;
+  transition: stroke 0.4s ease;
+}
+
+.journey__node-dot {
+  fill: var(--border);
+  transition: fill 0.4s ease;
+}
+
+.journey__node.is-passed .journey__node-ring {
+  stroke: var(--accent-1);
+}
+
+.journey__node.is-passed .journey__node-dot {
+  fill: var(--accent-1);
+}
+
+.journey__runner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-solid);
+  border: 2px solid var(--accent-1);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.55);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.journey__runner-emoji {
+  font-size: 1.3rem;
+  display: inline-block;
+}
+
+@media (max-width: 899px) {
+  .journey {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   Marquee
+   =========================================================================== */
+
+.marquee {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+  transform: rotate(-1.2deg) scale(1.02);
+  margin-block: -1rem 2rem;
+}
+
+.marquee__track {
+  display: flex;
+  gap: 2.6rem;
+  width: max-content;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+}
+
+.marquee__item {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 2.6rem;
+}
+
+.marquee__star {
+  color: var(--accent-1);
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ===========================================================================
+   Phase — pinned horizontal project gallery
+   =========================================================================== */
+
+.phase {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.4rem;
+  padding: 5.5rem 0 3rem;
+  overflow: hidden;
+}
+
+.section__ghost--phase {
+  top: 3rem;
+  left: -1rem;
+  right: auto;
+}
+
+.phase__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  width: min(1100px, 100% - 3rem);
+  margin-inline: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.phase__counter {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--accent-1);
+  line-height: 1;
+}
+
+.phase__counter-total {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.phase__viewport {
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.phase__track {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  padding-inline: max(1.5rem, calc((100vw - 1100px) / 2)) 6rem;
+  will-change: transform;
+}
+
+.phase .project {
+  width: clamp(300px, 36vw, 440px);
+  flex-shrink: 0;
+}
+
+.phase .project__cover {
+  height: 200px;
+}
+
+.phase__hint {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+}
+
+.project__index {
+  position: absolute;
+  top: 0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+/* ===========================================================================
    Reduced motion
    =========================================================================== */
 
@@ -953,5 +1290,25 @@ ol {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .journey,
+  .cursor-glow,
+  .scroll-progress {
+    display: none;
+  }
+
+  .marquee__track {
+    animation: none;
+  }
+
+  .phase {
+    min-height: auto;
+  }
+
+  .phase__track {
+    flex-wrap: wrap;
+    width: auto;
+    padding-inline: 1.5rem;
   }
 }
